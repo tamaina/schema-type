@@ -68,7 +68,7 @@ Just get the type from JSON Schema like object.
 You should `Ctx`, implementation of following type named `Defs`, the list of [defs](https://json-schema.org/understanding-json-schema/structuring.html#defs):
 
 ```typescript
-export type Defs = { [x: string]: { properties?: { [x: string]: Defs; }; oneOf?: Schema<Defs>[]; allOf?: Schema<Defs>[] } };
+export type Defs = { [x: string]: { type: 'object'; properties: Obj<Defs>; } | { oneOf?: Schema<Defs>[]; } | { allOf?: Schema<Defs>[]; }; };
 ```
 
 If you don have no def, write `{}` (empty object). 

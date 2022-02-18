@@ -151,7 +151,8 @@ const r: R = {
 		b: 0,
 		c: [
 			{ x: 'nyan' },
-		]
+		],
+		o: 'any',
 	},
 	d: 'boo',
 }

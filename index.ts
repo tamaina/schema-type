@@ -1,4 +1,4 @@
-export type Defs = { [x: string]: { properties?: Obj<Defs>; oneOf?: ReadonlyArray<Schema<Defs>>; allOf?: ReadonlyArray<Schema<Defs>> } };
+export type Defs = { [x: string]: { type: 'object'; properties: Obj<Defs>; } | { oneOf?: ReadonlyArray<Schema<Defs>>; } | { allOf?: ReadonlyArray<Schema<Defs>>; }; };
 
 export type Packed<Ctx extends Defs, x extends keyof Ctx> = SchemaTypeDef<Ctx, Ctx[x]>;
 
