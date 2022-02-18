@@ -1,4 +1,4 @@
-import { SchemaType, Packed } from 'schema-type';
+import { SchemaType, Packed } from '../index';
 
 /*
  * Simple Schema

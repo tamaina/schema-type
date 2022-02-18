@@ -1,6 +1,6 @@
-export type Refs = { [x: string]: { properties?: Obj<Refs>; oneOf?: ReadonlyArray<Schema<Refs>>; allOf?: ReadonlyArray<Schema<Refs>> } };
+export type Defs = { [x: string]: { properties?: Obj<Defs>; oneOf?: ReadonlyArray<Schema<Defs>>; allOf?: ReadonlyArray<Schema<Defs>> } };
 
-export type Packed<Ctx extends Refs, x extends keyof Ctx> = SchemaTypeDef<Ctx, Ctx[x]>;
+export type Packed<Ctx extends Defs, x extends keyof Ctx> = SchemaTypeDef<Ctx, Ctx[x]>;
 
 export type TypeStringef = 'null' | 'boolean' | 'integer' | 'number' | 'string' | 'array' | 'object' | 'any';
 
@@ -15,13 +15,13 @@ export type StringDefToType<T extends TypeStringef> =
 	any;
 
 // https://swagger.io/specification/?sbsearch=optional#schema-object
-export type OfSchema<Ctx extends Refs> = {
+export type OfSchema<Ctx extends Defs> = {
 	readonly anyOf?: ReadonlyArray<Schema<Ctx>>;
 	readonly oneOf?: ReadonlyArray<Schema<Ctx>>;
 	readonly allOf?: ReadonlyArray<Schema<Ctx>>;
 }
 
-export interface Schema<Ctx extends Refs> extends OfSchema<Ctx> {
+export interface Schema<Ctx extends Defs> extends OfSchema<Ctx> {
 	readonly type?: TypeStringef;
 	readonly nullable?: boolean;
 	readonly optional?: boolean;
@@ -40,15 +40,15 @@ export interface Schema<Ctx extends Refs> extends OfSchema<Ctx> {
 	readonly minLength?: number;
 }
 
-type OptionalPropertyNames<Ctx extends Refs, T extends Obj<Ctx>> = {
+type OptionalPropertyNames<Ctx extends Defs, T extends Obj<Ctx>> = {
 	[K in keyof T]: T[K]['optional'] extends true ? K : never
 }[keyof T];
 
-type NonOptionalPropertyNames<Ctx extends Refs, T extends Obj<Ctx>> = {
+type NonOptionalPropertyNames<Ctx extends Defs, T extends Obj<Ctx>> = {
 	[K in keyof T]: T[K]['optional'] extends false ? K : never;
 }[keyof T];
 
-type DefaultPropertyNames<Ctx extends Refs, T extends Obj<Ctx>> = {
+type DefaultPropertyNames<Ctx extends Defs, T extends Obj<Ctx>> = {
 	[K in keyof T]: T[K]['default'] extends null ? K :
 	T[K]['default'] extends string ? K :
 	T[K]['default'] extends number ? K :
@@ -57,16 +57,16 @@ type DefaultPropertyNames<Ctx extends Refs, T extends Obj<Ctx>> = {
 	never
 }[keyof T];
 
-export type Obj<Ctx extends Refs> = Record<string, Schema<Ctx>>;
+export type Obj<Ctx extends Defs> = Record<string, Schema<Ctx>>;
 
-export type ObjType<Ctx extends Refs, s extends Obj<Ctx>, RequiredProps extends ReadonlyArray<string>> =
+export type ObjType<Ctx extends Defs, s extends Obj<Ctx>, RequiredProps extends ReadonlyArray<string>> =
 	{ -readonly [P in keyof s]?: SchemaType<Ctx, s[P]> } &
 	{ -readonly [P in OptionalPropertyNames<Ctx, s>]?: SchemaType<Ctx, s[P]> } &
 	{ -readonly [P in RequiredProps[number]]: SchemaType<Ctx, s[P]> } &
 	{ -readonly [P in NonOptionalPropertyNames<Ctx, s>]: SchemaType<Ctx, s[P]> } &
 	{ -readonly [P in DefaultPropertyNames<Ctx, s>]: SchemaType<Ctx, s[P]> };
 
-type NullOrUndefined<Ctx extends Refs, p extends Schema<Ctx>, T> =
+type NullOrUndefined<Ctx extends Defs, p extends Schema<Ctx>, T> =
 	p['nullable'] extends true
 	? p['optional'] extends true
 	? (T | null | undefined)
@@ -75,22 +75,22 @@ type NullOrUndefined<Ctx extends Refs, p extends Schema<Ctx>, T> =
 	? (T | undefined)
 	: T;
 
-// 共用体型を交差型にする型 https://stackoverflow.com/questions/54938141/typescript-convert-union-to-intersection
+// Get intersection from union https://stackoverflow.com/questions/54938141/typescript-convert-union-to-intersection
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
 
 // https://github.com/misskey-dev/misskey/pull/8144#discussion_r785287552
-// 単純にSchemaTypeDef<X>で判定するだけではダメ
-type UnionSchemaType<Ctx extends Refs, a extends readonly any[], X extends Schema<Ctx> = a[number]> = X extends any ? SchemaType<Ctx, X> : never;
+// `extends any` needed to get union. 
+type UnionSchemaType<Ctx extends Defs, a extends readonly any[], X extends Schema<Ctx> = a[number]> = X extends any ? SchemaType<Ctx, X> : never;
 type ArrayUnion<T> = T extends any ? Array<T> : never;
 
-export type SchemaTypeDef<Ctx extends Refs, p extends Schema<Ctx>> =
+export type SchemaTypeDef<Ctx extends Defs, p extends Schema<Ctx>> =
 	p['type'] extends 'null' ? null :
 	p['type'] extends 'integer' ? number :
 	p['type'] extends 'number' ? number :
 	p['type'] extends 'string' ? (
 		p['enum'] extends readonly string[] ?
 		p['enum'][number] :
-		p['format'] extends 'date-time' ? string : // Dateにする？？
+		p['format'] extends 'date-time' ? string : // to return Date??
 		string
 	) :
 	p['type'] extends 'boolean' ? boolean :
@@ -115,4 +115,4 @@ export type SchemaTypeDef<Ctx extends Refs, p extends Schema<Ctx>> =
 	p['oneOf'] extends ReadonlyArray<Schema<Ctx>> ? UnionSchemaType<Ctx, p['oneOf']> :
 	any;
 
-export type SchemaType<Ctx extends Refs, p extends Schema<Ctx>> = NullOrUndefined<Ctx, p, SchemaTypeDef<Ctx, p>>;
+export type SchemaType<Ctx extends Defs, p extends Schema<Ctx>> = NullOrUndefined<Ctx, p, SchemaTypeDef<Ctx, p>>;
