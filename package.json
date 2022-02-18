@@ -1,0 +1,10 @@
+{
+  "name": "schema-type",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "author": "tamaina <tamaina@hotmail.co.jp>",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^4.5.5"
+  }
+}
